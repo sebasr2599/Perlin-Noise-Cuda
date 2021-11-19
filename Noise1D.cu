@@ -40,17 +40,17 @@ __global__ void perlinNoise1D(float *d_a, float x, int n) {
   int index = threadIdx.x + blockIdx.x*blockDim.x;
   int id = index;
   // for(int t = 0; t<n;t++){
-    while(id<n){
-    float total = 0;
-    for (int i = 0; i < octaves; i++) {
-      float freq = pow(2, (double)i);
-      float amp = pow(persistance, (double)i);
+    if (index < n){
+    // float total = 0;
+    // for (int i = 0; i < octaves; i++) {
+    //   float freq = pow(2, (double)i);
+    //   float amp = pow(persistance, (double)i);
 
-      total = total + interpolateNoise1D(id * freq) * amp;
-    }
-    d_a[id] = total;
+    //   total = total + interpolateNoise1D(id * freq) * amp;
+    // }
+    // d_a[id] = total;
     printf("%f \n",id);
-    id =  id + blockDim.x* gridDim.x;  
+     
   }
 }
 int main(int argc, char *argv[]) {
@@ -62,8 +62,9 @@ int main(int argc, char *argv[]) {
   cudaMalloc((void**)&d_a, size);
   a = (float*)malloc(size);
   cudaMemcpy(d_a, a, size, cudaMemcpyHostToDevice);
-
-  perlinNoise1D<<<1000, 1 >>>(a, (float)n, n);
+  dim3 Blocks(n);
+	dim3 Threads(n);
+  perlinNoise1D<<<Blocks, Threads >>>(a, (float)n, n);
 
   cudaMemcpy(a, d_a, size, cudaMemcpyDeviceToHost);
 
